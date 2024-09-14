@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Table nested stack template
+
+Parameters:
+  pTagEnv:
+    Description: Tag name environment
+    Type: String
+
+  pTagProyect:
+    Description: Tag name project
+    Type: String
+
+  pGlueCrawlerRawMeucci2a:
+    Description: Crawler name raw meucci2a
+    Type: String
+
+  pGlueDatabaseRaw:
+    Description: Data base name raw
+    Type: String
+
+  pGlueCrawlerRawMeucci2aPathRoot:
+    Description: Crawler raw path root
+    Type: String
+
+  pProcessingGlueExecutionRoleStack:
+    Description: Glue role name
+    Type: String
+
+Resources:
+  rGlueCrawlerRawMeucci2a:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Ref pGlueCrawlerRawMeucci2a
+      Role: !Ref pProcessingGlueExecutionRoleStack
+      DatabaseName: !Ref pGlueDatabaseRaw
+      Targets:
+        S3Targets:
+          - Path: !Ref pGlueCrawlerRawMeucci2aPathRoot
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+      Configuration: "{\"Version\": 1.0,\"Grouping\":{\"TableGroupingPolicy\":\"CombineCompatibleSchemas\",\"TableLevelConfiguration\":3}}"
+      Tags:
+        "ENV" : !Ref pTagEnv
+        "PROYECT": !Ref pTagProyect
+        "Name": !Ref pGlueCrawlerRawMeucci2a
+
+Outputs:
+  rGlueCrawlerRawMeucci2aName:
+    Description: Id for the crawler
+    Value: !Ref rGlueCrawlerRawMeucci2a

@@ -1,0 +1,12 @@
+{
+    "id": 0,
+    "dates": [
+        {
+			"id": 0,
+			"desc": "Tabla of parameters",
+            "date_start": "2023-06-28",
+            "date_end": "2023-06-30",
+			"period": ""
+        }
+    ]
+}

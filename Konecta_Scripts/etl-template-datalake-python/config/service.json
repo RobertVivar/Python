@@ -1,0 +1,52 @@
+{
+    "services":[
+        {
+            "id": 0,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/meucci2a/knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_calendario/",
+            "object": "calendario"
+        },
+        {
+            "id": 1,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/ppp/knta_dev_00_gluetable_datalake_raw_ppp_dbo_simulaciones/",
+            "object": "simulaciones"
+        },
+        {
+            "id": 2,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/latam/knta_dev_00_gluetable_datalake_raw_latam_dbo_trafico/",
+            "object": "trafico"
+        },
+        {
+            "id": 3,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/avaya/knta_dev_00_gluetable_datalake_raw_avaya_dbo_hsplit/",
+            "object": "hsplit"
+        },
+        {
+            "id": 4,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/kcrm/knta_dev_00_gluetable_datalake_raw_kcrm_dbo_gestion/",
+            "object": "gestion"
+        },
+        {
+            "id": 5,
+            "description": "AWS services",
+            "service": "s3",
+            "name": "knta-dev-00-datalake-raw",
+            "prefix":"/bbva/knta_dev_00_gluetable_datalake_raw_bbva_dbo_detalle/",
+            "object": "detalle"
+        }
+    ]
+}

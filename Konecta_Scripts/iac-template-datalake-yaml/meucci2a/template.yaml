@@ -1,0 +1,689 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy Data Lake Konecta project resources
+
+Parameters: 
+# Tags
+  pTagEnv:
+    Description: Tag name environment
+    Type: String
+    Default: DEV
+
+  pTagProyect:
+    Description: Tag name project
+    Type: String
+    Default: DataLake
+
+# Buckets
+  pS3BucketRaw:
+    Description: Bucket name raw dev
+    Type: String
+    Default: knta-dev-00-datalake-raw
+
+  pS3BucketStage:
+    Description: Bucket name stage dev
+    Type: String
+    Default: knta-dev-00-datalake-stage
+
+# Databases
+  pGlueDatabaseRaw:
+    Description: Data base name raw
+    Type: String
+    Default: knta-dev-00-gluedb-datalake-raw
+
+  pGlueDatabaseStage:
+    Description: Data base name stage
+    Type: String
+    Default: knta-dev-00-gluedb-datalake-stage
+
+# Template Jobs
+  TemplateURLJobsStage:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/jobs-stage.yaml
+
+# Process Crawlers
+  TemplateURLCrawlersRaw:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/crawlers-raw.yaml
+
+  TemplateURLCrawlersStage:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/crawlers-stage.yaml
+
+  pGlueCrawlerRawMeucci2a:
+    Description: Crawler name raw
+    Type: String
+    Default: knta-dev-00-gluecrawler-datalake-raw-meucci2a
+
+  pGlueCrawlerStageMeucci2a:
+    Description: Crawler name stage
+    Type: String
+    Default: knta-dev-00-gluecrawler-datalake-stage-meucci2a
+
+  pGlueCrawlerRawMeucci2aPathRoot:
+    Description: Crawler raw path root
+    Type: String
+    Default: s3://knta-dev-00-datalake-raw/meucci2a/
+
+  pGlueCrawlerStageMeucci2aPathRoot:
+    Description: Crawler stage path root
+    Type: String
+    Default: s3://knta-dev-00-datalake-stage/meucci2a/
+
+# Process Triggers
+  pGlueCrawlerTriggerRawMeucci2a:
+    Description: Trigger crawler name raw
+    Type: String
+    Default: knta-dev-00-gluecrawlertrigger-datalake-raw-meucci2a
+
+  pGlueCrawlerTriggerStageMeucci2a:
+    Description: Trigger crawler name stage
+    Type: String
+    Default: knta-dev-00-gluecrawlertrigger-datalake-stage-meucci2a
+
+  pGlueJobTriggerStageMeucci2a:
+    Description: Trigger job name stage
+    Type: String
+    Default: knta-dev-00-gluejobtrigger-datalake-stage-meucci2a
+
+  TemplateURLTriggerRaw:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/triggers-raw.yaml
+
+  TemplateURLTriggerStage:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/triggers-stage.yaml
+
+# Process Calendario
+  pGlueTableRawMeucci2aCalendario:
+    Description: Table name raw
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_calendario
+
+  pGlueTableStageMeucci2aCalendario:
+    Description: Table name stage
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_calendario
+
+  pGlueJobStageMeucci2aCalendario:
+    Description: Job name stage
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-calendario
+
+  pGlueJobStageScriptLocationMeucci2aCalendario:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-calendario.py
+
+# Process Cargo
+  pGlueTableRawMeucci2aCargo:
+    Description: Table name raw cargo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_cargo
+
+  pGlueTableStageMeucci2aCargo:
+    Description: Table name stage cargo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_cargo
+
+  pGlueJobStageMeucci2aCargo:
+    Description: Job name stage cargo
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cargo
+
+  pGlueJobStageScriptLocationMeucci2aCargo:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cargo.py
+
+# Process Cargo-tipo
+  pGlueTableRawMeucci2aCargoTipo:
+    Description: Table name raw cargotipo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_cargo_tipo
+
+  pGlueTableStageMeucci2aCargoTipo:
+    Description: Table name stage cargotipo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_cargo_tipo
+
+  pGlueJobStageMeucci2aCargoTipo:
+    Description: Job name stage cargotipo
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cargo-tipo
+
+  pGlueJobStageScriptLocationMeucci2aCargoTipo:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cargo-tipo.py
+
+# Process Cuenta
+  pGlueTableRawMeucci2aCuenta:
+    Description: Table name raw cuenta
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_cuenta
+
+  pGlueTableStageMeucci2aCuenta:
+    Description: Table name stage cuenta
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_cuenta
+
+  pGlueJobStageMeucci2aCuenta:
+    Description: Job name stage cuenta
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cuenta
+
+  pGlueJobStageScriptLocationMeucci2aCuenta:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-cuenta.py
+
+# Process Empleado
+  pGlueTableRawMeucci2aEmpleado:
+    Description: Table name raw empleado
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado
+
+  pGlueTableStageMeucci2aEmpleado:
+    Description: Table name stage empleado
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado
+
+  pGlueJobStageMeucci2aEmpleado:
+    Description: Job name stage empleado
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado
+
+  pGlueJobStageScriptLocationMeucci2aEmpleado:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado.py
+
+# Process Empleado-Cuenta
+  pGlueTableRawMeucci2aEmpleadoCuenta:
+    Description: Table name raw empleadocuenta
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_cuenta
+
+  pGlueTableStageMeucci2aEmpleadoCuenta:
+    Description: Table name stage empleadocuenta
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_cuenta
+
+  pGlueJobStageMeucci2aEmpleadoCuenta:
+    Description: Job name stage empleadocuenta
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-cuenta
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoCuenta:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-cuenta.py
+
+# Process Empleado-Modalidad-Trabajo
+  pGlueTableRawMeucci2aEmpleadoModalidadTrabajo:
+    Description: Table name raw modalidadtrabajo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_modalidad_trabajo
+
+  pGlueTableStageMeucci2aEmpleadoModalidadTrabajo:
+    Description: Table name stage modalidadtrabajo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_modalidad_trabajo
+
+  pGlueJobStageMeucci2aEmpleadoModalidadTrabajo:
+    Description: Job name stage modalidadtrabajo
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-modalidad-trabajo
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoModalidadTrabajo:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-modalidad-trabajo.py
+
+# Process Empleado-Servicio
+  pGlueTableRawMeucci2aEmpleadoServicio:
+    Description: Table name raw empleadoservicio
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_servicio
+
+  pGlueTableStageMeucci2aEmpleadoServicio:
+    Description: Table name stage empleadoservicio
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_servicio
+
+  pGlueJobStageMeucci2aEmpleadoServicio:
+    Description: Job name stage empleadoservicio
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-servicio
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoServicio:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-servicio.py
+
+# Process Empleado-Superiores
+  pGlueTableRawMeucci2aEmpleadoSuperiores:
+    Description: Table name raw empleadosuperiores
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_superiores
+
+  pGlueTableStageMeucci2aEmpleadoSuperiores:
+    Description: Table name stage empleadosuperiores
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_superiores
+
+  pGlueJobStageMeucci2aEmpleadoSuperiores:
+    Description: Job name stage empleadosuperiores
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-superiores
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoSuperiores:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-superiores.py
+
+# Process Empleado-Ubicacion
+  pGlueTableRawMeucci2aEmpleadoUbicacion:
+    Description: Table name raw empleadoubicacion
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_ubicacion
+
+  pGlueTableStageMeucci2aEmpleadoUbicacion:
+    Description: Table name stage empleadoubicacion
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_ubicacion
+
+  pGlueJobStageMeucci2aEmpleadoUbicacion:
+    Description: Job name stage empleadoubicacion
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-ubicacion
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoUbicacion:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-ubicacion.py
+
+# Process Modalidad-Trabajo
+  pGlueTableRawMeucci2aModalidadTrabajo:
+    Description: Table name raw modalidadtrabajo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_modalidad_trabajo
+
+  pGlueTableStageMeucci2aModalidadTrabajo:
+    Description: Table name stage modalidadtrabajo
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_modalidad_trabajo
+
+  pGlueJobStageMeucci2aModalidadTrabajo:
+    Description: Job name stage modalidadtrabajo
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-modalidad-trabajo
+
+  pGlueJobStageScriptLocationMeucci2aModalidadTrabajo:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-modalidad-trabajo.py
+
+# Process Servicios
+  pGlueTableRawMeucci2aServicios:
+    Description: Table name raw servicios
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_servicios
+
+  pGlueTableStageMeucci2aServicios:
+    Description: Table name stage servicios
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_servicios
+
+  pGlueJobStageMeucci2aServicios:
+    Description: Job name stage servicios
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-servicios
+
+  pGlueJobStageScriptLocationMeucci2aServicios:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-servicios.py
+
+# Process Site
+  pGlueTableRawMeucci2aSite:
+    Description: Table name raw site
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_site
+
+  pGlueTableStageMeucci2aSite:
+    Description: Table name stage site
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_site
+
+  pGlueJobStageMeucci2aSite:
+    Description: Job name stage site
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-site
+
+  pGlueJobStageScriptLocationMeucci2aSite:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-site.py
+
+# Process Sociedad
+  pGlueTableRawMeucci2aSociedad:
+    Description: Table name raw sociedad
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_sociedad
+
+  pGlueTableStageMeucci2aSociedad:
+    Description: Table name stage sociedad
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_sociedad
+
+  pGlueJobStageMeucci2aSociedad:
+    Description: Job name stage sociedad
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-sociedad
+
+  pGlueJobStageScriptLocationMeucci2aSociedad:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-sociedad.py
+
+# Process Subarea
+  pGlueTableRawMeucci2aSubarea:
+    Description: Table name raw subarea
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_subarea
+
+  pGlueTableStageMeucci2aSubarea:
+    Description: Table name stage subarea
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_subarea
+
+  pGlueJobStageMeucci2aSubarea:
+    Description: Job name stage subarea
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-subarea
+
+  pGlueJobStageScriptLocationMeucci2aSubarea:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-subarea.py
+
+# Process Empleado-Cuenta-Lucent
+  pGlueTableRawMeucci2aEmpleadoCuentaLucent:
+    Description: Table name raw empleadocuentalucent
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_cuentalucent
+
+  pGlueTableStageMeucci2aEmpleadoCuentaLucent:
+    Description: Table name stage empleadocuentalucent
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_cuentalucent
+
+  pGlueJobStageMeucci2aEmpleadoCuentaLucent:
+    Description: Job name stage empleadocuentalucent
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-cuentalucent
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoCuentaLucent:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-cuentalucent.py
+
+# Process Empleado-Sistema-Externo
+  pGlueTableRawMeucci2aEmpleadoSistemaExterno:
+    Description: Table name raw empleadosistemaexterno
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_empleado_sistemaexterno
+
+  pGlueTableStageMeucci2aEmpleadoSistemaExterno:
+    Description: Table name stage empleadosistemaexterno
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_empleado_sistemaexterno
+
+  pGlueJobStageMeucci2aEmpleadoSistemaExterno:
+    Description: Job name stage empleadosistemaexterno
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-sistemaexterno
+
+  pGlueJobStageScriptLocationMeucci2aEmpleadoSistemaExterno:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-empleado-sistemaexterno.py
+
+# Process Sistema-Externo
+  pGlueTableRawMeucci2aSistemaExterno:
+    Description: Table name raw sistemaexterno
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_raw_meucci2a_dbo_sistemaexterno
+
+  pGlueTableStageMeucci2aSistemaExterno:
+    Description: Table name stage sistemaexterno
+    Type: String
+    Default: knta_dev_00_gluetable_datalake_stage_meucci2a_dbo_sistemaexterno
+
+  pGlueJobStageMeucci2aSistemaExterno:
+    Description: Job name stage sistemaexterno
+    Type: String
+    Default: knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-sistemaexterno
+
+  pGlueJobStageScriptLocationMeucci2aSistemaExterno:
+    Description: Python script location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/scripts/knta-dev-00-gluejob-datalake-stage-meucci2a-dbo-sistemaexterno.py
+
+# Job scripts
+  pGlueJobStageMeucci2aTempDir:
+    Description: Temporary directory location meucci2a
+    Type: String
+    Default: s3://knta-dev-00-gluejob-scripts/datalake/meucci2a/temp/
+
+# Process Workflow
+  pGlueWorkflowMeucci2a:
+    Description: Workflow name
+    Type: String
+    Default: knta-dev-00-glueworkflow-datalake-meucci2a
+
+  TemplateURLWorkflows:
+    Description: URL of the nested stack template
+    Type: String
+    Default: https://knta-dev-00-cloudformation-stack.s3.amazonaws.com/meucci2a/glue/workflows.yaml
+
+# Parameters Aditionals
+  pProcessingGlueExecutionRole:
+    Description: Glue rol name
+    Type: String
+    Default: knta-dev-00-iamrole-datalake-glue-startjobcrawler
+
+  pArnGlueExecutionRoleStack:
+    Description: Glue rol name
+    Type: String
+    Default: arn:aws:iam::939108293311:role/knta-dev-00-iamrole-datalake-glue-startjobcrawler
+
+Resources:
+# Jobs
+  rGlueJobsStageStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLJobsStage
+      Parameters:
+        pTagEnv: !Ref pTagEnv
+        pTagProyect: !Ref pTagProyect
+        pS3BucketRaw: !Ref pS3BucketRaw
+        pS3BucketStage: !Ref pS3BucketStage
+        pGlueJobStageMeucci2aTempDir: !Ref pGlueJobStageMeucci2aTempDir
+        pProcessingGlueExecutionRoleStack: !Ref pArnGlueExecutionRoleStack
+        # Calendario
+        pGlueJobStageMeucci2aCalendario: !Ref pGlueJobStageMeucci2aCalendario
+        pGlueJobStageScriptLocationMeucci2aCalendario: !Ref pGlueJobStageScriptLocationMeucci2aCalendario
+        pGlueTableRawMeucci2aCalendario: !Ref pGlueTableRawMeucci2aCalendario
+        pGlueTableStageMeucci2aCalendario: !Ref pGlueTableStageMeucci2aCalendario
+        # Cargo
+        pGlueJobStageMeucci2aCargo: !Ref pGlueJobStageMeucci2aCargo
+        pGlueJobStageScriptLocationMeucci2aCargo: !Ref pGlueJobStageScriptLocationMeucci2aCargo
+        pGlueTableRawMeucci2aCargo: !Ref pGlueTableRawMeucci2aCargo
+        pGlueTableStageMeucci2aCargo: !Ref pGlueTableStageMeucci2aCargo
+        # CargoTipo
+        pGlueJobStageMeucci2aCargoTipo: !Ref pGlueJobStageMeucci2aCargoTipo
+        pGlueJobStageScriptLocationMeucci2aCargoTipo: !Ref pGlueJobStageScriptLocationMeucci2aCargoTipo
+        pGlueTableRawMeucci2aCargoTipo: !Ref pGlueTableRawMeucci2aCargoTipo
+        pGlueTableStageMeucci2aCargoTipo: !Ref pGlueTableStageMeucci2aCargoTipo
+        # Cuenta
+        pGlueJobStageMeucci2aCuenta: !Ref pGlueJobStageMeucci2aCuenta
+        pGlueJobStageScriptLocationMeucci2aCuenta: !Ref pGlueJobStageScriptLocationMeucci2aCuenta
+        pGlueTableRawMeucci2aCuenta: !Ref pGlueTableRawMeucci2aCuenta
+        pGlueTableStageMeucci2aCuenta: !Ref pGlueTableStageMeucci2aCuenta
+        # Empleado
+        pGlueJobStageMeucci2aEmpleado: !Ref pGlueJobStageMeucci2aEmpleado
+        pGlueJobStageScriptLocationMeucci2aEmpleado: !Ref pGlueJobStageScriptLocationMeucci2aEmpleado
+        pGlueTableRawMeucci2aEmpleado: !Ref pGlueTableRawMeucci2aEmpleado
+        pGlueTableStageMeucci2aEmpleado: !Ref pGlueTableStageMeucci2aEmpleado
+        # EmpleadoCuenta
+        pGlueJobStageMeucci2aEmpleadoCuenta: !Ref pGlueJobStageMeucci2aEmpleadoCuenta
+        pGlueJobStageScriptLocationMeucci2aEmpleadoCuenta: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoCuenta
+        pGlueTableRawMeucci2aEmpleadoCuenta: !Ref pGlueTableRawMeucci2aEmpleadoCuenta
+        pGlueTableStageMeucci2aEmpleadoCuenta: !Ref pGlueTableStageMeucci2aEmpleadoCuenta
+        # EmpleadoModalidadTrabajo
+        pGlueJobStageMeucci2aEmpleadoModalidadTrabajo: !Ref pGlueJobStageMeucci2aEmpleadoModalidadTrabajo
+        pGlueJobStageScriptLocationMeucci2aEmpleadoModalidadTrabajo: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoModalidadTrabajo
+        pGlueTableRawMeucci2aEmpleadoModalidadTrabajo: !Ref pGlueTableRawMeucci2aEmpleadoModalidadTrabajo
+        pGlueTableStageMeucci2aEmpleadoModalidadTrabajo: !Ref pGlueTableStageMeucci2aEmpleadoModalidadTrabajo
+        # EmpleadoServicio
+        pGlueJobStageMeucci2aEmpleadoServicio: !Ref pGlueJobStageMeucci2aEmpleadoServicio
+        pGlueJobStageScriptLocationMeucci2aEmpleadoServicio: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoServicio
+        pGlueTableRawMeucci2aEmpleadoServicio: !Ref pGlueTableRawMeucci2aEmpleadoServicio
+        pGlueTableStageMeucci2aEmpleadoServicio: !Ref pGlueTableStageMeucci2aEmpleadoServicio
+        # EmpleadoSuperiores
+        pGlueJobStageMeucci2aEmpleadoSuperiores: !Ref pGlueJobStageMeucci2aEmpleadoSuperiores
+        pGlueJobStageScriptLocationMeucci2aEmpleadoSuperiores: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoSuperiores
+        pGlueTableRawMeucci2aEmpleadoSuperiores: !Ref pGlueTableRawMeucci2aEmpleadoSuperiores
+        pGlueTableStageMeucci2aEmpleadoSuperiores: !Ref pGlueTableStageMeucci2aEmpleadoSuperiores
+        # EmpleadoUbicacion
+        pGlueJobStageMeucci2aEmpleadoUbicacion: !Ref pGlueJobStageMeucci2aEmpleadoUbicacion
+        pGlueJobStageScriptLocationMeucci2aEmpleadoUbicacion: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoUbicacion
+        pGlueTableRawMeucci2aEmpleadoUbicacion: !Ref pGlueTableRawMeucci2aEmpleadoUbicacion
+        pGlueTableStageMeucci2aEmpleadoUbicacion: !Ref pGlueTableStageMeucci2aEmpleadoUbicacion
+        # ModalidadTrabajo
+        pGlueJobStageMeucci2aModalidadTrabajo: !Ref pGlueJobStageMeucci2aModalidadTrabajo
+        pGlueJobStageScriptLocationMeucci2aModalidadTrabajo: !Ref pGlueJobStageScriptLocationMeucci2aModalidadTrabajo
+        pGlueTableRawMeucci2aModalidadTrabajo: !Ref pGlueTableRawMeucci2aModalidadTrabajo
+        pGlueTableStageMeucci2aModalidadTrabajo: !Ref pGlueTableStageMeucci2aModalidadTrabajo
+        # Servicios
+        pGlueJobStageMeucci2aServicios: !Ref pGlueJobStageMeucci2aServicios
+        pGlueJobStageScriptLocationMeucci2aServicios: !Ref pGlueJobStageScriptLocationMeucci2aServicios
+        pGlueTableRawMeucci2aServicios: !Ref pGlueTableRawMeucci2aServicios
+        pGlueTableStageMeucci2aServicios: !Ref pGlueTableStageMeucci2aServicios
+        # Site
+        pGlueJobStageMeucci2aSite: !Ref pGlueJobStageMeucci2aSite
+        pGlueJobStageScriptLocationMeucci2aSite: !Ref pGlueJobStageScriptLocationMeucci2aSite
+        pGlueTableRawMeucci2aSite: !Ref pGlueTableRawMeucci2aSite
+        pGlueTableStageMeucci2aSite: !Ref pGlueTableStageMeucci2aSite
+        # Sociedad
+        pGlueJobStageMeucci2aSociedad: !Ref pGlueJobStageMeucci2aSociedad
+        pGlueJobStageScriptLocationMeucci2aSociedad: !Ref pGlueJobStageScriptLocationMeucci2aSociedad
+        pGlueTableRawMeucci2aSociedad: !Ref pGlueTableRawMeucci2aSociedad
+        pGlueTableStageMeucci2aSociedad: !Ref pGlueTableStageMeucci2aSociedad
+        # Subarea
+        pGlueJobStageMeucci2aSubarea: !Ref pGlueJobStageMeucci2aSubarea
+        pGlueJobStageScriptLocationMeucci2aSubarea: !Ref pGlueJobStageScriptLocationMeucci2aSubarea
+        pGlueTableRawMeucci2aSubarea: !Ref pGlueTableRawMeucci2aSubarea
+        pGlueTableStageMeucci2aSubarea: !Ref pGlueTableStageMeucci2aSubarea
+        # EmpleadoCuentaLucent
+        pGlueJobStageMeucci2aEmpleadoCuentaLucent: !Ref pGlueJobStageMeucci2aEmpleadoCuentaLucent
+        pGlueJobStageScriptLocationMeucci2aEmpleadoCuentaLucent: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoCuentaLucent
+        pGlueTableRawMeucci2aEmpleadoCuentaLucent: !Ref pGlueTableRawMeucci2aEmpleadoCuentaLucent
+        pGlueTableStageMeucci2aEmpleadoCuentaLucent: !Ref pGlueTableStageMeucci2aEmpleadoCuentaLucent
+        # EmpleadoSistemaExterno
+        pGlueJobStageMeucci2aEmpleadoSistemaExterno: !Ref pGlueJobStageMeucci2aEmpleadoSistemaExterno
+        pGlueJobStageScriptLocationMeucci2aEmpleadoSistemaExterno: !Ref pGlueJobStageScriptLocationMeucci2aEmpleadoSistemaExterno
+        pGlueTableRawMeucci2aEmpleadoSistemaExterno: !Ref pGlueTableRawMeucci2aEmpleadoSistemaExterno
+        pGlueTableStageMeucci2aEmpleadoSistemaExterno: !Ref pGlueTableStageMeucci2aEmpleadoSistemaExterno
+        # SistemaExterno
+        pGlueJobStageMeucci2aSistemaExterno: !Ref pGlueJobStageMeucci2aSistemaExterno
+        pGlueJobStageScriptLocationMeucci2aSistemaExterno: !Ref pGlueJobStageScriptLocationMeucci2aSistemaExterno
+        pGlueTableRawMeucci2aSistemaExterno: !Ref pGlueTableRawMeucci2aSistemaExterno
+        pGlueTableStageMeucci2aSistemaExterno: !Ref pGlueTableStageMeucci2aSistemaExterno
+      TimeoutInMinutes: 5
+
+# Crawlers
+  rGlueCrawlerRawStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLCrawlersRaw
+      Parameters:
+        pTagEnv: !Ref pTagEnv
+        pTagProyect: !Ref pTagProyect
+        pGlueCrawlerRawMeucci2a: !Ref pGlueCrawlerRawMeucci2a
+        pGlueDatabaseRaw: !Ref pGlueDatabaseRaw
+        pGlueCrawlerRawMeucci2aPathRoot: !Ref pGlueCrawlerRawMeucci2aPathRoot
+        pProcessingGlueExecutionRoleStack: !Ref pArnGlueExecutionRoleStack
+      TimeoutInMinutes: 5
+
+  rGlueCrawlerStageStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLCrawlersStage
+      Parameters:
+        pTagEnv: !Ref pTagEnv
+        pTagProyect: !Ref pTagProyect
+        pGlueCrawlerStageMeucci2a: !Ref pGlueCrawlerStageMeucci2a
+        pGlueDatabaseStage: !Ref pGlueDatabaseStage
+        pGlueCrawlerStageMeucci2aPathRoot: !Ref pGlueCrawlerStageMeucci2aPathRoot
+        pProcessingGlueExecutionRoleStack: !Ref pArnGlueExecutionRoleStack
+      TimeoutInMinutes: 5
+
+# Workflows
+  rGlueWorkflowStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLWorkflows
+      Parameters:
+        pTagEnv: !Ref pTagEnv
+        pTagProyect: !Ref pTagProyect
+        pGlueWorkflowMeucci2a: !Ref pGlueWorkflowMeucci2a
+      TimeoutInMinutes: 5
+
+# Triggers
+  rGlueTriggerRawStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLTriggerRaw
+      Parameters:
+        pGlueCrawlerTriggerRawMeucci2a: !Ref pGlueCrawlerTriggerRawMeucci2a
+        pGlueWorkflowMeucci2a: !GetAtt rGlueWorkflowStack.Outputs.rGlueWorkflowMeucci2aName
+        pGlueCrawlerRawMeucci2a: !GetAtt rGlueCrawlerRawStack.Outputs.rGlueCrawlerRawMeucci2aName
+      TimeoutInMinutes: 5
+
+  rGlueTriggerStageStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref TemplateURLTriggerStage
+      Parameters:
+        pGlueCrawlerTriggerStageMeucci2a: !Ref pGlueCrawlerTriggerStageMeucci2a
+        pGlueWorkflowMeucci2a: !GetAtt rGlueWorkflowStack.Outputs.rGlueWorkflowMeucci2aName
+        pGlueCrawlerStageMeucci2a: !GetAtt rGlueCrawlerStageStack.Outputs.rGlueCrawlerStageMeucci2aName
+        pGlueJobTriggerStageMeucci2a: !Ref pGlueJobTriggerStageMeucci2a
+        pGlueCrawlerRawMeucci2a: !GetAtt rGlueCrawlerRawStack.Outputs.rGlueCrawlerRawMeucci2aName
+        pGlueJobStageMeucci2aCalendario: !Ref pGlueJobStageMeucci2aCalendario
+        pGlueJobStageMeucci2aCargo: !Ref pGlueJobStageMeucci2aCargo
+        pGlueJobStageMeucci2aCargoTipo: !Ref pGlueJobStageMeucci2aCargoTipo
+        pGlueJobStageMeucci2aCuenta: !Ref pGlueJobStageMeucci2aCuenta
+        pGlueJobStageMeucci2aEmpleado: !Ref pGlueJobStageMeucci2aEmpleado
+        pGlueJobStageMeucci2aEmpleadoCuenta: !Ref pGlueJobStageMeucci2aEmpleadoCuenta
+        pGlueJobStageMeucci2aEmpleadoModalidadTrabajo: !Ref pGlueJobStageMeucci2aEmpleadoModalidadTrabajo
+        pGlueJobStageMeucci2aEmpleadoServicio: !Ref pGlueJobStageMeucci2aEmpleadoServicio
+        pGlueJobStageMeucci2aEmpleadoSuperiores: !Ref pGlueJobStageMeucci2aEmpleadoSuperiores
+        pGlueJobStageMeucci2aEmpleadoUbicacion: !Ref pGlueJobStageMeucci2aEmpleadoUbicacion
+        pGlueJobStageMeucci2aModalidadTrabajo: !Ref pGlueJobStageMeucci2aModalidadTrabajo
+        pGlueJobStageMeucci2aServicios: !Ref pGlueJobStageMeucci2aServicios
+        pGlueJobStageMeucci2aSite: !Ref pGlueJobStageMeucci2aSite
+        pGlueJobStageMeucci2aSociedad: !Ref pGlueJobStageMeucci2aSociedad
+        pGlueJobStageMeucci2aSubarea: !Ref pGlueJobStageMeucci2aSubarea
+        pGlueJobStageMeucci2aEmpleadoCuentaLucent: !Ref pGlueJobStageMeucci2aEmpleadoCuentaLucent
+        pGlueJobStageMeucci2aEmpleadoSistemaExterno: !Ref pGlueJobStageMeucci2aEmpleadoSistemaExterno
+        pGlueJobStageMeucci2aSistemaExterno: !Ref pGlueJobStageMeucci2aSistemaExterno
+      TimeoutInMinutes: 5

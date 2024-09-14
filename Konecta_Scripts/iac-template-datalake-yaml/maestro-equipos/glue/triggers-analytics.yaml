@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Table nested stack template
+
+Parameters:
+  pGlueCrawlerTriggerAnalyticsMaestro:
+    Description: Trigger crawler name maestro
+    Type: String
+
+  pGlueWorkflowMaestro:
+    Description: Workflow name maestro
+    Type: String
+
+  pGlueCrawlerAnalyticsMaestro:
+    Description: Crawler name maestro
+    Type: String  
+
+  pGlueJobAnalyticsMaestroMaestroEquipos:
+    Description: Job name analytics maestro
+    Type: String
+
+  pGlueJobAnalyticsMaestroMaestroEquiposUsuarios:
+    Description: Job name analytics maestro
+    Type: String
+    
+  pGlueJobTriggerAnalyticsMaestro:
+    Description: Trigger Job name maestro
+    Type: String
+ 
+Resources:
+  rGlueCrawlerTriggerStageMeucci2aCalendario:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: !Ref pGlueCrawlerTriggerAnalyticsMaestro
+      Type: CONDITIONAL
+      StartOnCreation: True
+      Description: Source Crawler trigger
+      WorkflowName: !Ref pGlueWorkflowMaestro
+      Actions:
+      - CrawlerName: !Ref pGlueCrawlerAnalyticsMaestro
+      Predicate:
+        Conditions:
+        - LogicalOperator: EQUALS
+          JobName: !Ref pGlueJobAnalyticsMaestroMaestroEquipos
+          State: SUCCEEDED
+        - LogicalOperator: EQUALS
+          JobName: !Ref pGlueJobAnalyticsMaestroMaestroEquiposUsuarios
+          State: SUCCEEDED
+        Logical: AND
+
+  rGlueJobTriggerAnalyticsMaestroMaestroEquipos:
+    Type: AWS::Glue::Trigger
+    Properties:
+      Name: !Ref pGlueJobTriggerAnalyticsMaestro
+      # StartOnCreation: true
+      # Type: SCHEDULED
+      # Schedule: cron(30 6 * * ? *)
+      Type: ON_DEMAND
+      Description: Job trigger
+      WorkflowName: !Ref pGlueWorkflowMaestro
+      Actions:
+      - JobName: !Ref pGlueJobAnalyticsMaestroMaestroEquipos
+      - JobName: !Ref pGlueJobAnalyticsMaestroMaestroEquiposUsuarios
+

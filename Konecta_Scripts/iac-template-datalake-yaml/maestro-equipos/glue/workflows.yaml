@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Table nested stack template
+
+Parameters:
+  pTagEnv:
+    Description: Tag name environment
+    Type: String
+
+  pTagProyect:
+    Description: Tag name project
+    Type: String
+
+  pGlueWorkflowMaestro:
+    Description: Workflow name maestro
+    Type: String
+
+Resources:
+  rGlueWorkflowMaestro:
+    Type: AWS::Glue::Workflow
+    Properties: 
+      Description: Workflow to crawl table
+      Name: !Ref pGlueWorkflowMaestro
+      Tags:
+        "ENV" : !Ref pTagEnv
+        "PROYECT": !Ref pTagProyect
+        "Name": !Ref pGlueWorkflowMaestro
+
+Outputs:
+  rGlueWorkflowMaestroName:
+    Description: Id for the crawler
+    Value: !Ref rGlueWorkflowMaestro
